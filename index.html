@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ley de Transporte Terrestre — Consulta interactiva</title>
+<meta name="description" content="Consulta interactiva de la Ley de Transporte Terrestre de Venezuela (Gaceta Oficial N° 38.985). Buscador por número de artículo y texto completo, índice por títulos y capítulos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='48' height='48' rx='10' transform='rotate(45 32 32)' fill='%23f2b705' stroke='%230c1530' stroke-width='4'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='bold' font-size='26' text-anchor='middle' fill='%230c1530'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header id="nav">
+  <a class="brand" href="#inicio" aria-label="Inicio — Ley de Transporte Terrestre">
+    <span class="brand-sign" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0c1530" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17h16M6 17l1.5-6h9L18 17M8 11V7h8v4M9 20v-3M15 20v-3"/></svg>
+    </span>
+    <span class="brand-text">
+      <strong>Ley de Transporte Terrestre</strong>
+      <span>República Bolivariana de Venezuela</span>
+    </span>
+  </a>
+  <nav aria-label="Secciones">
+    <a href="#inicio" data-nav="inicio" class="active">Inicio</a>
+    <a href="#consultar" data-nav="consultar">Consultar</a>
+    <a href="#indice" data-nav="indice">Índice</a>
+    <a href="#disposiciones" data-nav="disposiciones">Disposiciones</a>
+  </nav>
+  <button class="nav-search-btn" id="nav-search" aria-label="Buscar en la ley">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+    <span>Buscar</span><kbd>/</kbd>
+  </button>
+  <button id="menu-btn" aria-label="Abrir índice" aria-expanded="false">☰</button>
+</header>
+
+<div id="scrim" aria-hidden="true"></div>
+
+<section id="hero">
+  <a id="inicio" style="position:absolute;top:0" aria-hidden="true"></a>
+  <div class="hero-glow g1" aria-hidden="true"></div>
+  <div class="hero-glow g2" aria-hidden="true"></div>
+  <div class="hero-grid">
+    <div>
+      <span class="hero-eyebrow"><span class="dot"></span><span id="gaceta-badge">Gaceta Oficial</span></span>
+      <h1>Ley de <em>Transporte Terrestre</em></h1>
+      <p class="hero-sub">Sistema Nacional de Transporte Terrestre</p>
+      <p class="hero-desc" id="hero-desc"></p>
+      <div class="hero-stats" id="hero-stats" aria-label="Estructura de la ley"></div>
+    </div>
+    <figure class="hero-figure">
+      <span class="tape">Seguridad vial</span>
+      <div class="frame">
+        <img src="Imagen Transito.jpg" alt="Ilustración de la Ley de Transporte Terrestre y Tránsito en Venezuela: funcionaria de tránsito verificando la licencia de conducir, señales de PARE, límite de velocidad, ceda el paso y zona escolar, con recomendaciones de seguridad vial.">
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section id="searchbar" aria-label="Buscador de la ley">
+  <a id="consultar" style="position:absolute;top:0" aria-hidden="true"></a>
+  <div class="searchbar-inner">
+    <div class="search-field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false"
+        placeholder="Busca un número de artículo (ej.: 45) o un tema (ej.: licencias, multas, velocidad)…"
+        aria-label="Buscar por número de artículo o texto">
+      <button id="q-clear" aria-label="Limpiar búsqueda">✕</button>
+    </div>
+    <div class="goto-field">
+      <label for="goto-n">Ir al art.</label>
+      <input id="goto-n" type="number" min="1" max="215" placeholder="N.º" aria-label="Número de artículo">
+      <button id="goto-btn">Ir</button>
+    </div>
+  </div>
+  <div class="chips-row" id="chips">
+    <span class="lbl">Prueba:</span>
+    <button class="chip c-num" data-q="artículo 45">artículo 45</button>
+    <button class="chip c-num" data-q="artículo 169">artículo 169 · sanciones</button>
+    <button class="chip" data-q="licencia de conducir">licencia de conducir</button>
+    <button class="chip" data-q="cinturón de seguridad">cinturón de seguridad</button>
+    <button class="chip" data-q="velocidad">velocidad</button>
+    <button class="chip" data-q="disposición transitoria cuarta">transitoria cuarta</button>
+  </div>
+</section>
+
+<div id="results-bar" role="status" aria-live="polite">
+  <div class="results-card">
+    <span class="r-icon" id="results-icon" aria-hidden="true">🔎</span>
+    <span id="results-text"></span>
+    <span class="art-jumper hidden" id="art-jumper">
+      <button id="art-prev" title="Artículo anterior">← Anterior</button>
+      <button id="art-next" title="Artículo siguiente">Siguiente →</button>
+    </span>
+    <button id="show-all">Ver ley completa</button>
+  </div>
+</div>
+
+<div id="no-results">
+  <div class="no-res-card">
+    <div class="big" aria-hidden="true">🚧</div>
+    <h3>Sin resultados en esta vía</h3>
+    <p>No se encontraron artículos que coincidan con tu búsqueda. Prueba con otro término o con un número de artículo del 1 al 215.</p>
+  </div>
+</div>
+
+<main id="main">
+  <a id="indice" style="position:absolute;top:0" aria-hidden="true"></a>
+  <aside id="index-panel" aria-label="Índice de la ley">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Índice de la ley
+    </h2>
+    <div id="index-tree"></div>
+    <div class="idx-extra">
+      <a href="#disposiciones"><span class="sq" style="background:var(--red-500)"></span>Disposiciones (10)</a>
+      <a href="#cierre"><span class="sq" style="background:var(--green-500)"></span>Promulgación</a>
+    </div>
+  </aside>
+  <div id="ley-content"></div>
+</main>
+
+<button id="to-top" aria-label="Volver arriba">↑</button>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<footer id="footer">
+  <div class="watermark" aria-hidden="true"><span>Creado por: Consorcioweb</span></div>
+  <div class="footer-inner">
+    <p class="f-brand">Ley de <em>Transporte Terrestre</em></p>
+    <p class="f-src" id="footer-src"></p>
+    <p class="f-credit">Creado por: <b>Consorcioweb</b></p>
+    <p class="f-note">Interfaz de consulta con fines informativos. Texto transcrito de la Gaceta Oficial; en caso de discrepancia prevalece la publicación oficial.</p>
+  </div>
+</footer>
+
+<script src="ley-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
