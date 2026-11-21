@@ -573,18 +573,6 @@ body {
   background: repeating-linear-gradient(90deg, var(--amber-500) 0 40px, transparent 40px 72px);
   opacity: .35;
 }
-.watermark {
-  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
-}
-.watermark span {
-  width: 200px; height: 50px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
-  font-size: 17px; letter-spacing: .02em; white-space: nowrap;
-  color: rgba(255, 201, 60, .06);
-  -webkit-text-stroke: 1px rgba(255, 201, 60, .35);
-  user-select: none;
-}
 .footer-inner { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; text-align: center; }
 .footer-inner .f-brand {
   font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: .08em;
@@ -655,5 +643,4 @@ body {
   .art-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
   .hidden { display: block !important; }
   #footer { background: #fff; color: #333; border-top: 2px solid #000; }
-  .watermark span { -webkit-text-stroke: 1px rgba(0,0,0,.2); }
 }
