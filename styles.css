@@ -216,13 +216,6 @@ body {
 }
 .hero-figure:hover .frame { transform: rotate(0deg) scale(1.015); box-shadow: 0 0 0 8px rgba(242,183,5,.22), 0 24px 60px -18px rgba(8,15,36,.7); }
 .hero-figure img { display: block; width: 100%; height: auto; }
-.hero-figure .tape {
-  position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-2deg);
-  background: var(--red-500); color: #fff; font-family: var(--font-display);
-  font-weight: 700; letter-spacing: .18em; text-transform: uppercase; font-size: .82rem;
-  padding: 6px 22px; border-radius: 6px; z-index: 2;
-  box-shadow: 0 6px 18px -6px rgba(215, 38, 61, .8);
-}
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ============ Barra de búsqueda pegajosa ============ */
