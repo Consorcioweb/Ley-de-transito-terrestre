@@ -129,6 +129,8 @@
   var ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
   var ICON_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
   var ICON_PRINT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>';
+  var ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
   function artCard(a) {
     var ctx = "Título " + a._tit.num + (a._cap ? " · Capítulo " + a._cap.num : "");
@@ -138,6 +140,7 @@
         '<div class="art-title-wrap"><p class="art-ep">' + esc(a.ep || "") + sevBadge(a.ep) + "</p>" +
         '<p class="art-ctx">' + esc(ctx) + "</p></div>" +
         '<div class="art-actions">' +
+          '<button class="icon-btn act-audio" title="Escuchar artículo" aria-pressed="false" aria-label="Escuchar artículo ' + a.n + ' en audio">' + ICON_SPEAKER + "</button>" +
           '<button class="icon-btn act-print" title="Imprimir artículo" aria-label="Imprimir artículo ' + a.n + '">' + ICON_PRINT + "</button>" +
           '<button class="icon-btn act-copy" title="Copiar artículo" aria-label="Copiar artículo ' + a.n + '">' + ICON_COPY + "</button>" +
           '<button class="icon-btn act-link" title="Copiar enlace" aria-label="Copiar enlace del artículo ' + a.n + '">' + ICON_LINK + "</button>" +
@@ -516,11 +519,88 @@
     }, 80);
   }
 
+  /* ---------- lectura en audio (español de Venezuela / latino) ---------- */
+  var speakN = null, speakBtn = null;
+  function speechAvailable() {
+    return "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function";
+  }
+  function pickSpanishVoice() {
+    var voices = window.speechSynthesis.getVoices() || [];
+    var es = voices.filter(function (v) { return /^es(-|_|$)/i.test(v.lang || ""); });
+    if (!es.length) return null;
+    var prefs = ["es-ve", "es-419", "es-us", "es-mx", "es-co", "es-ar", "es-cl", "es-pe", "es-ec", "es-do", "es-uy", "es-py", "es-bo", "es-cr", "es-gt", "es-hn", "es-ni", "es-pa", "es-pr", "es-sv", "es-cu", "es-es"];
+    for (var i = 0; i < prefs.length; i++) {
+      for (var j = 0; j < es.length; j++) {
+        if ((es[j].lang || "").replace("_", "-").toLowerCase() === prefs[i]) return es[j];
+      }
+    }
+    return es[0];
+  }
+  function speechText(a) {
+    function sent(s) {
+      s = String(s).trim();
+      return /[.!?;:]$/.test(s) ? s : s + ".";
+    }
+    var parts = ["Artículo " + a.n + "."];
+    if (a.ep) parts.push(sent(a.ep));
+    a.b.forEach(function (b) {
+      if (b.p) parts.push(sent(b.p));
+      if (b.ol) b.ol.forEach(function (li) { parts.push(sent(li)); });
+      if (b.lv) b.lv.forEach(function (x) { parts.push(sent(x[1])); });
+    });
+    return parts.join(" ");
+  }
+  function setAudioBtn(btn, n, playing) {
+    if (!btn) return;
+    btn.classList.toggle("playing", playing);
+    btn.innerHTML = playing ? ICON_STOP : ICON_SPEAKER;
+    btn.title = playing ? "Detener audio" : "Escuchar artículo";
+    btn.setAttribute("aria-pressed", playing ? "true" : "false");
+    btn.setAttribute("aria-label", (playing ? "Detener audio del artículo " : "Escuchar artículo ") + n);
+  }
+  function stopSpeech() {
+    if (!speechAvailable()) return;
+    window.speechSynthesis.cancel();
+    if (speakBtn) setAudioBtn(speakBtn, speakN, false);
+    speakN = null;
+    speakBtn = null;
+  }
+  function toggleAudio(a, btn) {
+    if (!speechAvailable()) {
+      toast("La lectura en audio no está disponible en este navegador.");
+      return;
+    }
+    if (speakN === a.n) { stopSpeech(); return; }
+    stopSpeech();
+    var voice = pickSpanishVoice();
+    if (!voice) {
+      toast("El español no está disponible: no se encontró ninguna voz en español en este dispositivo para reproducir el audio.");
+      return;
+    }
+    var u = new SpeechSynthesisUtterance(speechText(a));
+    u.lang = voice.lang || "es-VE";
+    u.voice = voice;
+    u.rate = 1;
+    u.pitch = 1;
+    speakN = a.n;
+    speakBtn = btn;
+    setAudioBtn(btn, a.n, true);
+    u.onend = u.onerror = function () {
+      if (speakN === a.n) {
+        setAudioBtn(btn, a.n, false);
+        speakN = null;
+        speakBtn = null;
+      }
+    };
+    window.speechSynthesis.speak(u);
+  }
+
   /* ---------- eventos ---------- */
   function init() {
     buildHero();
     buildContent();
     buildIndex();
+    if (speechAvailable()) window.speechSynthesis.getVoices();
 
     var q = $("#q"), debounce = null;
     q.addEventListener("input", function () {
@@ -558,15 +638,16 @@
       });
     });
 
-    /* imprimir / copiar / enlace (delegación) */
+    /* audio / imprimir / copiar / enlace (delegación) */
     $("#ley-content").addEventListener("click", function (e) {
-      var btn = e.target.closest(".act-copy, .act-link, .act-print");
+      var btn = e.target.closest(".act-copy, .act-link, .act-print, .act-audio");
       if (!btn) return;
       var card = btn.closest(".art-card");
       if (card.hasAttribute("data-n")) {
         var a = ART_BY_N[card.getAttribute("data-n")];
         if (btn.classList.contains("act-copy")) copyText(artPlainText(a), "Artículo " + a.n + " copiado al portapapeles.");
         else if (btn.classList.contains("act-print")) printArticle(a);
+        else if (btn.classList.contains("act-audio")) toggleAudio(a, btn);
         else {
           var url = location.href.split("#")[0] + "#articulo-" + a.n;
           copyText(url, "Enlace del artículo " + a.n + " copiado.");

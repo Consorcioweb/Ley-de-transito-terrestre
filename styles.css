@@ -465,6 +465,12 @@ body {
 }
 .icon-btn svg { width: 17px; height: 17px; }
 .icon-btn:hover { background: var(--asphalt-700); border-color: var(--asphalt-700); color: var(--amber-300); transform: translateY(-1px); }
+.icon-btn.playing { background: var(--green-500); border-color: var(--green-600); color: #fff; animation: speakPulse 1.6s ease-in-out infinite; }
+.icon-btn.playing:hover { background: var(--green-600); border-color: var(--green-600); color: #fff; }
+@keyframes speakPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 158, 90, .55); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 158, 90, 0); }
+}
 .art-body { padding: 18px 22px 20px; font-family: var(--font-body); font-size: .99rem; color: var(--ink-soft); }
 .art-body p { margin-bottom: 12px; line-height: 1.78; text-align: justify; }
 .art-body p:last-child { margin-bottom: 0; }
