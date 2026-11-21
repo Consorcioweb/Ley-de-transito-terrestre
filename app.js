@@ -128,6 +128,7 @@
   }
   var ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
   var ICON_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+  var ICON_PRINT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>';
 
   function artCard(a) {
     var ctx = "Título " + a._tit.num + (a._cap ? " · Capítulo " + a._cap.num : "");
@@ -137,6 +138,7 @@
         '<div class="art-title-wrap"><p class="art-ep">' + esc(a.ep || "") + sevBadge(a.ep) + "</p>" +
         '<p class="art-ctx">' + esc(ctx) + "</p></div>" +
         '<div class="art-actions">' +
+          '<button class="icon-btn act-print" title="Imprimir artículo" aria-label="Imprimir artículo ' + a.n + '">' + ICON_PRINT + "</button>" +
           '<button class="icon-btn act-copy" title="Copiar artículo" aria-label="Copiar artículo ' + a.n + '">' + ICON_COPY + "</button>" +
           '<button class="icon-btn act-link" title="Copiar enlace" aria-label="Copiar enlace del artículo ' + a.n + '">' + ICON_LINK + "</button>" +
         "</div>" +
@@ -449,6 +451,71 @@
     return lines.join("\n");
   }
 
+  /* ---------- impresión de un artículo ---------- */
+  function printDocHTML(a, ctx) {
+    var body = "";
+    a.b.forEach(function (b) {
+      if (b.p) body += "<p>" + esc(b.p) + "</p>";
+      if (b.ol) body += "<ol>" + b.ol.map(function (li) { return "<li>" + esc(li) + "</li>"; }).join("") + "</ol>";
+      if (b.lv) body += '<div class="lv">' + b.lv.map(function (x) {
+        return '<div class="i l' + x[0] + '">' + esc(x[1]) + "</div>";
+      }).join("") + "</div>";
+    });
+    var css = [
+      "@page{margin:2cm 2.2cm}",
+      "*{box-sizing:border-box}",
+      "body{font-family:Georgia,'Times New Roman',serif;color:#1d2433;line-height:1.7;margin:0;font-size:12pt}",
+      ".top{border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:16px}",
+      ".country{font-family:Arial,sans-serif;font-weight:700;font-size:8.5pt;letter-spacing:.18em;text-transform:uppercase;color:#555}",
+      ".law{font-weight:700;font-size:15pt;margin-top:6px}",
+      ".gaceta{font-family:Arial,sans-serif;font-size:8.5pt;color:#666;margin-top:4px}",
+      ".ctx{font-family:Arial,sans-serif;font-weight:700;font-size:8pt;letter-spacing:.1em;text-transform:uppercase;color:#777;margin-bottom:6px}",
+      "h1{font-size:13.5pt;margin:0 0 12px;line-height:1.35}",
+      "h1 small{font-weight:400;font-style:italic;font-size:12pt;color:#333}",
+      "p{margin:0 0 10px;text-align:justify}",
+      "ol{margin:0 0 12px;padding-left:1.7em}",
+      "li{margin:5px 0;text-align:justify}",
+      ".lv{margin:0 0 12px;counter-reset:lvn}",
+      ".i{margin:5px 0;text-align:justify}",
+      ".i.l0{counter-increment:lvn;padding-left:1.7em;position:relative;font-weight:600}",
+      ".i.l0::before{content:counter(lvn) '.';position:absolute;left:0;font-weight:700}",
+      ".i.l1{padding-left:3.4em}",
+      ".i.l2{padding-left:5.1em}",
+      ".foot{margin-top:24px;padding-top:10px;border-top:1px solid #bbb;display:flex;justify-content:space-between;gap:12px;font-family:Arial,sans-serif;font-size:8pt;color:#666}",
+      ".foot b{color:#333}"
+    ].join("");
+    var title = "Artículo " + a.n + (a.ep ? " — " + a.ep : "");
+    return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>' + esc(title) + "</title><style>" + css + "</style></head><body>" +
+      '<div class="top"><div class="country">República Bolivariana de Venezuela</div>' +
+      '<div class="law">Ley de Transporte Terrestre</div>' +
+      '<div class="gaceta">' + esc(D.meta.gaceta) + " — " + esc(D.meta.fecha) + "</div></div>" +
+      '<div class="ctx">' + esc(ctx) + "</div>" +
+      "<h1>Artículo " + a.n + (a.ep ? " <small>" + esc(a.ep) + "</small>" : "") + "</h1>" +
+      body +
+      '<div class="foot"><span>Ley de Transporte Terrestre · Artículo ' + a.n + "</span><span>Creado por: <b>Consorcioweb</b></span></div>" +
+      "</body></html>";
+  }
+  function printArticle(a) {
+    var frame = document.getElementById("print-frame");
+    if (!frame) {
+      frame = document.createElement("iframe");
+      frame.id = "print-frame";
+      frame.setAttribute("aria-hidden", "true");
+      frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1024px;height:768px;border:0";
+      document.body.appendChild(frame);
+    }
+    var ctx = "Título " + a._tit.num + " — " + a._tit.nombre +
+      (a._cap ? " · Capítulo " + a._cap.num + " — " + a._cap.nombre : "");
+    var doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(printDocHTML(a, ctx));
+    doc.close();
+    setTimeout(function () {
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    }, 80);
+  }
+
   /* ---------- eventos ---------- */
   function init() {
     buildHero();
@@ -491,14 +558,15 @@
       });
     });
 
-    /* copiar / enlace (delegación) */
+    /* imprimir / copiar / enlace (delegación) */
     $("#ley-content").addEventListener("click", function (e) {
-      var btn = e.target.closest(".act-copy, .act-link");
+      var btn = e.target.closest(".act-copy, .act-link, .act-print");
       if (!btn) return;
       var card = btn.closest(".art-card");
       if (card.hasAttribute("data-n")) {
         var a = ART_BY_N[card.getAttribute("data-n")];
         if (btn.classList.contains("act-copy")) copyText(artPlainText(a), "Artículo " + a.n + " copiado al portapapeles.");
+        else if (btn.classList.contains("act-print")) printArticle(a);
         else {
           var url = location.href.split("#")[0] + "#articulo-" + a.n;
           copyText(url, "Enlace del artículo " + a.n + " copiado.");
