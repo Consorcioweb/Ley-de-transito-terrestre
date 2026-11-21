@@ -577,11 +577,12 @@ body {
   position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
 }
 .watermark span {
+  width: 200px; height: 50px;
+  display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
-  font-size: clamp(1.4rem, 7.2vw, 7.2rem); letter-spacing: .06em; white-space: nowrap;
-  color: rgba(255, 201, 60, .05);
-  -webkit-text-stroke: 1.5px rgba(255, 201, 60, .22);
-  transform: rotate(-4deg);
+  font-size: 17px; letter-spacing: .02em; white-space: nowrap;
+  color: rgba(255, 201, 60, .06);
+  -webkit-text-stroke: 1px rgba(255, 201, 60, .35);
   user-select: none;
 }
 .footer-inner { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; text-align: center; }
